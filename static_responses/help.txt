@@ -1,0 +1,7 @@
+Below is a list of useful functions:
+
+/sidequest - Create a new sidequest.
+/display - Display a person's sidequest board.
+/users - Display a list of users.
+/addme - Add yourself to the database.
+/removeme - Remove yourself from the database.

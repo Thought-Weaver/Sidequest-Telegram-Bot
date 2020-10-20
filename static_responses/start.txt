@@ -1,0 +1,13 @@
+Welcome to Sidequest Bot! This bot was made to create sidequests for people who need something done.
+
+To get started, you can make your sidequest board using /addme.
+
+You can see everyone using /users or show a specific person with /display [name]. You can also click the person's name button in /users to display their sidequests.
+
+You can display your own board using /display without specifying a name. From here, you can delete a sidequest you've made, archive it if it's finished, or edit it.
+
+When looking at someone else's sidequest board, you can accept or un-accept a sidequest by clicking the checkbox next to the sidequest.
+
+To make a sidequest, use /sidequest. This will begin a conversation that will guide you through the setup process.
+
+To see a list of commands, use /help.
