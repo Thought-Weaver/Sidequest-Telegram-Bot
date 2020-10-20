@@ -8,6 +8,8 @@ You can display your own board using /display without specifying a name. From he
 
 When looking at someone else's sidequest board, you can accept or un-accept a sidequest by clicking the checkbox next to the sidequest.
 
-To make a sidequest, use /sidequest. This will begin a conversation that will guide you through the setup process.
+To make a sidequest, use /sidequest in your DMs with the bot. This will begin a conversation that will guide you through the setup process.
+
+You can see your sidequests with /mysidequests.
 
 To see a list of commands, use /help.

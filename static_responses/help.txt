@@ -5,3 +5,4 @@ Below is a list of useful functions:
 /users - Display a list of users.
 /addme - Add yourself to the database.
 /removeme - Remove yourself from the database.
+/mysidequests - Shows the sidequests you've accepted.
