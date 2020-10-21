@@ -7,3 +7,4 @@ Below is a list of useful functions:
 /removeme - Remove yourself from the database.
 /mysidequests - Shows the sidequests you've accepted.
 /showall - Display all open sidequests.
+/archives - Shows your sidequests that you've archived.
