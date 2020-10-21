@@ -1,0 +1,6 @@
+Patch Notes (10/21/2020):
+
+-Added notifications when a new sidequest is added.
+-Added /showall and a Show All button for sidequests.
+-Added a list button that shows you the number of people who have accepted a sidequest.
+-Restored conditional appearance of sidequest boards. If it's your board, you'll get options to edit, delete, and archive sidequests. If you display someone else's, it'll have the option to accept and list the current accepters.

@@ -6,3 +6,4 @@ Below is a list of useful functions:
 /addme - Add yourself to the database.
 /removeme - Remove yourself from the database.
 /mysidequests - Shows the sidequests you've accepted.
+/showall - Display all open sidequests.

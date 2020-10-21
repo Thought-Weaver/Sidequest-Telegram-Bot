@@ -22,7 +22,7 @@ with open("api_key.txt", 'r') as f:
     TOKEN = f.read().rstrip()
 
 # Format is mmddyyyy and then additional letters if I need a hotfix.
-PATCHNUMBER = "04262020"
+PATCHNUMBER = "10212020"
 
 ADMIN = [539621524]
 
@@ -80,7 +80,7 @@ def restricted(func):
     return wrapped
 
 
-def send_patchnotes(bot):
+def send_patchnotes():
     path = "./static_responses/patchnotes_" + PATCHNUMBER + ".txt"
 
     if PATCHNUMBER in sidequest_database["patches"] or not os.path.isfile(path):
@@ -128,7 +128,9 @@ def get_name_from_database(id):
 
 def users_handler(update, context):
     chat_id = update.message.chat.id
-    buttons = []
+    # Callback data for display is:
+    # [SHOWALL (header)]
+    buttons = [[telegram.InlineKeyboardButton(text="Show All", callback_data="SHOWALL")]]
 
     text = "Users:"
     for id, name in sidequest_database["users"]:
@@ -146,33 +148,55 @@ def make_display_buttons(telegram_id, requester_id):
     buttons = []
     count = 0
 
-    for title, description, reward, accepters in sidequest_database["sidequests"][telegram_id]:
-        buttons.append(
-            [
-                # Callback data for show is:
-                # [SHOW (header), Sidequest Giver Telegram ID, Sidequest ID]
-                telegram.InlineKeyboardButton(text=title,
-                                              callback_data="SHOW,%s,%s" % (telegram_id, count))
-            ]
-        )
-        buttons.append(
-            [
-                # Callback data for delete is:
-                # [DELETE (header), Sidequest Owner Telegram ID, Sidequest ID]
-                telegram.InlineKeyboardButton(text="❌", callback_data="DELETE,%s,%s" % (telegram_id, count)),
-                # Callback data for archive is:
-                # [ARCHIVE (header), Sidequest Owner Telegram ID, Sidequest ID]
-                telegram.InlineKeyboardButton(text="🔒", callback_data="ARCHIVE,%s,%s" % (telegram_id, count)),
-                # Callback data for edit is:
-                # [EDIT (header), Sidequest Owner Telegram ID, Sidequest ID]
-                telegram.InlineKeyboardButton(text="✏️", callback_data="EDIT,%s,%s" % (telegram_id, count)),
-                # Callback data for toggle is:
-                # [TOGGLE (header), Sidequest Giver Telegram ID, Sidequest ID]
-                telegram.InlineKeyboardButton(text="⬜" if requester_id not in accepters else "☑️",
-                                              callback_data="TOGGLE,%s,%s" % (telegram_id, count))
-            ]
-        )
-        count += 1
+    if telegram_id == requester_id:
+        for title, description, reward, accepters in sidequest_database["sidequests"][telegram_id]:
+            buttons.append(
+                [
+                    # Callback data for show is:
+                    # [SHOW (header), Sidequest Giver Telegram ID, Sidequest ID]
+                    telegram.InlineKeyboardButton(text=title if title != "" else "[NO TITLE]",
+                                                  callback_data="SHOW,%s,%s" % (telegram_id, count))
+                ]
+            )
+            buttons.append(
+                [
+                    # Callback data for delete is:
+                    # [DELETE (header), Sidequest Owner Telegram ID, Sidequest ID]
+                    telegram.InlineKeyboardButton(text="❌", callback_data="DELETE,%s,%s" % (telegram_id, count)),
+                    # Callback data for archive is:
+                    # [ARCHIVE (header), Sidequest Owner Telegram ID, Sidequest ID]
+                    telegram.InlineKeyboardButton(text="🔒", callback_data="ARCHIVE,%s,%s" % (telegram_id, count)),
+                    # Callback data for edit is:
+                    # [EDIT (header), Sidequest Owner Telegram ID, Sidequest ID]
+                    telegram.InlineKeyboardButton(text="✏️", callback_data="EDIT,%s,%s" % (telegram_id, count)),
+                    # Callback data for listing the accepters is:
+                    # [LIST (header), Sidequest Owner Telegram ID, Sidequest ID]
+                    telegram.InlineKeyboardButton(text="≡ (%s)" % len(accepters), callback_data="LIST,%s,%s" % (telegram_id, count))
+                ]
+            )
+            count += 1
+    else:
+        for title, description, reward, accepters in sidequest_database["sidequests"][telegram_id]:
+            buttons.append(
+                [
+                    # Callback data for show is:
+                    # [SHOW (header), Sidequest Giver Telegram ID, Sidequest ID]
+                    telegram.InlineKeyboardButton(text=title if title != "" else "[NO TITLE]",
+                                                  callback_data="SHOW,%s,%s" % (telegram_id, count))
+                ]
+            )
+            buttons.append(
+                [
+                    # Callback data for listing the accepters is:
+                    # [LIST (header), Sidequest Owner Telegram ID, Sidequest ID]
+                    telegram.InlineKeyboardButton(text="≡ (%s)" % len(accepters), callback_data="LIST,%s,%s" % (telegram_id, count)),
+                    # Callback data for toggle is:
+                    # [TOGGLE (header), Sidequest Giver Telegram ID, Sidequest ID]
+                    telegram.InlineKeyboardButton(text="⬜" if requester_id not in accepters else "☑️",
+                                                  callback_data="TOGGLE,%s,%s" % (telegram_id, count))
+                ]
+            )
+            count += 1
 
     return buttons
 
@@ -296,7 +320,7 @@ def add_me_handler(update, context):
     # Sort by name
     sidequest_database["users"] = sorted(sidequest_database["users"], key=lambda x: str(x[1]).lower())
 
-    send_message(chat_id, "You've been added! Make sure to DM the bot with /start to be able to get messages!")
+    send_message(chat_id, "You've been added! Make sure to send me a DM to be able to get messages!")
 
 
 def remove_me_confirmed_handler(update, context):
@@ -365,6 +389,18 @@ def ban_handler(update, context):
             break
 
     send_message(chat_id, "That user has been removed!")
+
+
+def show_all_handler(update, context):
+    chat_id = update.message.chat.id
+    user = update.message.from_user
+
+    for id, name in sidequest_database["users"]:
+        if id != user.id and len(sidequest_database["sidequests"][id]) > 0:
+            bot.send_message(chat_id=chat_id,
+                             text="<b>Sidequests for %s:</b>\n\n" % name,
+                             reply_markup=telegram.InlineKeyboardMarkup(make_display_buttons(id, user.id)),
+                             parse_mode=telegram.ParseMode.HTML)
 
 
 def button_handler(update, context):
@@ -460,6 +496,23 @@ def button_handler(update, context):
         title, description, reward, accepters = sidequest_database["sidequests"][questgiver_id][quest_id]
 
         send_message(chat_id, "<b>Title:</b> %s" % title + "\n\n<b>Description:</b> %s" % description + "\n\n<b>Reward:</b> %s" % reward)
+    elif split_data[0] == "SHOWALL":
+        for id, name in sidequest_database["users"]:
+            if id != user_id and len(sidequest_database["sidequests"][id]) > 0:
+                bot.send_message(chat_id=chat_id,
+                                 text="<b>Sidequests for %s:</b>\n\n" % name,
+                                 reply_markup=telegram.InlineKeyboardMarkup(make_display_buttons(id, user_id)),
+                                 parse_mode=telegram.ParseMode.HTML)
+    elif split_data[0] == "LIST":
+        questgiver_id = int(split_data[1])
+        quest_id = int(split_data[2])
+
+        title, description, reward, accepters = sidequest_database["sidequests"][questgiver_id][quest_id]
+
+        text = "The following people have accepted this sidequest:\n\n"
+        for id in accepters:
+            text += get_name_from_database(id) + "\n"
+        send_message(chat_id, text)
 
     return ConversationHandler.END
 
@@ -526,6 +579,7 @@ def skip_title_handler(update, context):
         return ConversationHandler.END
 
     update.message.reply_text("No title added. Now send me some text for the description, use /skipdesc, or use /removedesc.")
+
     return DESCRIPTION
 
 
@@ -538,6 +592,7 @@ def skip_description_handler(update, context):
         return ConversationHandler.END
 
     update.message.reply_text("No description added. Lastly, you need to send some text for the reward, use /skipreward, or use /removereward.")
+
     return REWARD
 
 
@@ -587,18 +642,29 @@ def add_reward_handler(update, context):
 
     update.message.reply_text("Thanks! You're all done!")
 
+    for id, name in sidequest_database["users"]:
+        if id != user.id:
+            send_message(id, "%s has added a new sidequest, %s!" % (
+            get_name_from_database(user.id), sidequest_database["sidequests"][user.id][quest_id][0]))
+
     return ConversationHandler.END
 
 
 def skip_reward_handler(update, context):
     chat_id = update.message.chat_id
     user = update.message.from_user
+    quest_id = context.user_data["current_quest"]
 
     if not check_profile_existence(user.id):
         send_message(chat_id, "You don't have a sidequest board yet! Make one using /am.")
         return ConversationHandler.END
 
     update.message.reply_text("No reward added. You're all done!")
+
+    for id, name in sidequest_database["users"]:
+        if id != user.id:
+            send_message(id, "%s has added a new sidequest, %s!" % (get_name_from_database(user.id), sidequest_database["sidequests"][user.id][quest_id][0]))
+
     return ConversationHandler.END
 
 
@@ -615,6 +681,11 @@ def remove_reward_handler(update, context):
 
     update.message.reply_text("The reward has been removed. You're all done!")
 
+    for id, name in sidequest_database["users"]:
+        if id != user.id:
+            send_message(id, "%s has added a new sidequest, %s!" % (
+            get_name_from_database(user.id), sidequest_database["sidequests"][user.id][quest_id][0]))
+
     return ConversationHandler.END
 
 
@@ -627,6 +698,7 @@ def cancel_handler(update, context):
         return ConversationHandler.END
 
     send_message(chat_id, "Exited from sidequest creator!")
+
     return ConversationHandler.END
 
 
@@ -712,6 +784,7 @@ if __name__ == "__main__":
     remove_me_aliases = ["removeme", "rm"]
     feedback_aliases = ["feedback", "report"]
     my_sidequests_aliases = ["mysidequests", "ms"]
+    show_all_aliases = ["showall", "sa"]
     #clear_aliases = ["clear"]
 
     commands = [("display", display_aliases),
@@ -720,7 +793,8 @@ if __name__ == "__main__":
                 ("remove_me", remove_me_aliases),
                 ("remove_me_confirmed", ["rmc"]),
                 ("feedback", feedback_aliases),
-                ("my_sidequests", my_sidequests_aliases)
+                ("my_sidequests", my_sidequests_aliases),
+                ("show_all", show_all_aliases)
                 #("clear", clear_aliases)
                 ]
 
@@ -787,7 +861,7 @@ if __name__ == "__main__":
 
     # Run the bot
 
-    send_patchnotes(bot)
+    send_patchnotes()
 
     updater.start_polling()
     updater.idle()
