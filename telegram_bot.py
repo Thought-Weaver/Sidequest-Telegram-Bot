@@ -336,6 +336,10 @@ def remove_me_confirmed_handler(update, context):
         if id == user.id:
             del sidequest_database["sidequests"][user.id]
             break
+        else:
+            for title, description, reward, accepters in sidequest_database["sidequests"][id]:
+                if user.id in accepters:
+                    accepters.remove(user.id)
 
     send_message(chat_id, "You've been removed!")
 
@@ -444,6 +448,11 @@ def button_handler(update, context):
             send_message(chat_id, "That's not your sidequest list!")
             return
 
+        title, description, reward, accepters = sidequest_database["sidequests"][questgiver_id][quest_id]
+
+        for accepter in accepters:
+            send_message(accepter, "The sidequest, %s by %s, you were on was just deleted!" % (title, get_name_from_database(questgiver_id)))
+
         del sidequest_database["sidequests"][questgiver_id][quest_id]
 
         bot.edit_message_text(chat_id=chat_id,
@@ -458,6 +467,11 @@ def button_handler(update, context):
         if user_id != questgiver_id:
             send_message(chat_id, "That's not your sidequest list!")
             return
+
+        title, description, reward, accepters = sidequest_database["sidequests"][questgiver_id][quest_id]
+
+        for accepter in accepters:
+            send_message(accepter, "The sidequest, %s by %s, you were on was just archived!" % (title, get_name_from_database(questgiver_id)))
 
         sidequest_database["archives"][questgiver_id] = sidequest_database["sidequests"][questgiver_id][quest_id][:]
         del sidequest_database["sidequests"][questgiver_id][quest_id]
@@ -702,6 +716,14 @@ def cancel_handler(update, context):
     return ConversationHandler.END
 
 
+def archives_handler(update, context):
+    chat_id = update.message.chat.id
+    user = update.message.from_user
+    
+    for title, description, reward, accepters in sidequest_database["archives"][user.id]:
+        send_message(chat_id, "<b>Title:</b> %s" % title + "\n\n<b>Description:</b> %s" % description + "\n\n<b>Reward:</b> %s" % reward + "\n\n<b>Accepters:</b> %s" % ",".join(accepters))
+
+
 def feedback_handler(update, context):
     user = update.message.from_user
 
@@ -785,6 +807,7 @@ if __name__ == "__main__":
     feedback_aliases = ["feedback", "report"]
     my_sidequests_aliases = ["mysidequests", "ms"]
     show_all_aliases = ["showall", "sa"]
+    archives_aliases = ["archives"]
     #clear_aliases = ["clear"]
 
     commands = [("display", display_aliases),
@@ -794,7 +817,8 @@ if __name__ == "__main__":
                 ("remove_me_confirmed", ["rmc"]),
                 ("feedback", feedback_aliases),
                 ("my_sidequests", my_sidequests_aliases),
-                ("show_all", show_all_aliases)
+                ("show_all", show_all_aliases),
+                ("archives", archives_aliases)
                 #("clear", clear_aliases)
                 ]
 

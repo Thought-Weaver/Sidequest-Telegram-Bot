@@ -1,0 +1,4 @@
+Patch Notes (10/22/2020):
+
+-Added /archives to see sidequests you've marked as completed.
+-Added notifications when a sidequest you’re on is deleted or archived.
