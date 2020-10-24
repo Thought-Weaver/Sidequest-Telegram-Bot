@@ -61,6 +61,7 @@ def send_message(chat_id, text, photo=None):
                 bot.send_message(chat_id=chat_id, text=text[x:x + 4096], parse_mode=telegram.ParseMode.HTML)
         else:
             bot.send_message(chat_id=chat_id, text=text, parse_mode=telegram.ParseMode.HTML)
+
         if photo is not None:
             bot.send_photo(chat_id=chat_id, photo=photo, parse_mode=telegram.ParseMode.HTML)
     except TelegramError as e:
@@ -723,6 +724,10 @@ def cancel_handler(update, context):
 def archives_handler(update, context):
     chat_id = update.message.chat.id
     user = update.message.from_user
+
+    if not check_profile_existence(user.id):
+        send_message(chat_id, "You don't have a sidequest board yet! Make one using /am.")
+        return
 
     send_message(chat_id, "<b>Your Archived Sidequests:</b>")
     for title, description, reward, accepters in sidequest_database["archives"][user.id]:
