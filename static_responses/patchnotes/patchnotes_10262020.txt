@@ -1,0 +1,11 @@
+Patch Notes (10/26/2020):
+
+New Features:
+
+-Added /archives to see sidequests you've marked as completed.
+-Added notifications when a sidequest you’re on is deleted or archived.
+-Added longer text support.
+
+Bug Fixes:
+
+-Fixed a bug where notifications were being stopped for everyone if someone hadn't messaged the bot.

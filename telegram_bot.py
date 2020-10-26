@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import telegram
 from telegram.ext import Updater, CommandHandler, ConversationHandler, MessageHandler, CallbackQueryHandler, Filters
-from telegram.error import TelegramError
+from telegram.error import TelegramError, Unauthorized
 import logging
 
 import os
@@ -22,7 +22,7 @@ with open("api_key.txt", 'r') as f:
     TOKEN = f.read().rstrip()
 
 # Format is mmddyyyy and then additional letters if I need a hotfix.
-PATCHNUMBER = "10212020"
+PATCHNUMBER = "10262020"
 
 ADMIN = [539621524]
 
@@ -64,6 +64,9 @@ def send_message(chat_id, text, photo=None):
 
         if photo is not None:
             bot.send_photo(chat_id=chat_id, photo=photo, parse_mode=telegram.ParseMode.HTML)
+    except Unauthorized as u:
+        # Just ignore that person for now.
+        pass
     except TelegramError as e:
         raise e
 
