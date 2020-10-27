@@ -1,0 +1,5 @@
+Patch Notes (10/26/2020):
+
+Bug Fixes:
+
+-Updated notification for a new sidequest to correctly have a button.

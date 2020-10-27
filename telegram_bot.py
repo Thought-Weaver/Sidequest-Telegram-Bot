@@ -22,7 +22,7 @@ with open("api_key.txt", 'r') as f:
     TOKEN = f.read().rstrip()
 
 # Format is mmddyyyy and then additional letters if I need a hotfix.
-PATCHNUMBER = "10262020"
+PATCHNUMBER = "10272020"
 
 ADMIN = [539621524]
 
@@ -664,10 +664,15 @@ def add_reward_handler(update, context):
 
     update.message.reply_text("Thanks! You're all done!")
 
+    text = "%s has added a new sidequest:" % get_name_from_database(user.id)
+    buttons = [[telegram.InlineKeyboardButton(text="%s" % sidequest_database["sidequests"][user.id][quest_id][0], callback_data="SHOW,%s,%s" % (user.id, quest_id))]]
+
     for id, name in sidequest_database["users"]:
         if id != user.id:
-            send_message(id, "%s has added a new sidequest, %s!" % (
-            get_name_from_database(user.id), sidequest_database["sidequests"][user.id][quest_id][0]))
+            bot.send_message(chat_id=id,
+                             text=text,
+                             reply_markup=telegram.InlineKeyboardMarkup(buttons),
+                             parse_mode=telegram.ParseMode.HTML)
 
     return ConversationHandler.END
 
@@ -683,9 +688,15 @@ def skip_reward_handler(update, context):
 
     update.message.reply_text("No reward added. You're all done!")
 
+    text = "%s has added a new sidequest:" % get_name_from_database(user.id)
+    buttons = [[telegram.InlineKeyboardButton(text="%s" % sidequest_database["sidequests"][user.id][quest_id][0], callback_data="SHOW,%s,%s" % (user.id, quest_id))]]
+
     for id, name in sidequest_database["users"]:
         if id != user.id:
-            send_message(id, "%s has added a new sidequest, %s!" % (get_name_from_database(user.id), sidequest_database["sidequests"][user.id][quest_id][0]))
+            bot.send_message(chat_id=id,
+                             text=text,
+                             reply_markup=telegram.InlineKeyboardMarkup(buttons),
+                             parse_mode=telegram.ParseMode.HTML)
 
     return ConversationHandler.END
 
@@ -703,10 +714,15 @@ def remove_reward_handler(update, context):
 
     update.message.reply_text("The reward has been removed. You're all done!")
 
+    text = "%s has added a new sidequest:" % get_name_from_database(user.id)
+    buttons = [[telegram.InlineKeyboardButton(text="%s" % sidequest_database["sidequests"][user.id][quest_id][0], callback_data="SHOW,%s,%s" % (user.id, quest_id))]]
+
     for id, name in sidequest_database["users"]:
         if id != user.id:
-            send_message(id, "%s has added a new sidequest, %s!" % (
-            get_name_from_database(user.id), sidequest_database["sidequests"][user.id][quest_id][0]))
+            bot.send_message(chat_id=id,
+                             text=text,
+                             reply_markup=telegram.InlineKeyboardMarkup(buttons),
+                             parse_mode=telegram.ParseMode.HTML)
 
     return ConversationHandler.END
 
