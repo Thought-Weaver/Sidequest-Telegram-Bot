@@ -227,15 +227,10 @@ def make_my_sidequest_buttons(telegram_id):
                     )
                     buttons.append(
                         [
-                            # Callback data for delete is:
-                            # [DELETE (header), Sidequest Owner Telegram ID, Sidequest ID]
-                            telegram.InlineKeyboardButton(text="❌", callback_data="DELETE,%s,%s" % (id, count)),
-                            # Callback data for archive is:
-                            # [ARCHIVE (header), Sidequest Owner Telegram ID, Sidequest ID]
-                            telegram.InlineKeyboardButton(text="🔒", callback_data="ARCHIVE,%s,%s" % (id, count)),
-                            # Callback data for edit is:
-                            # [EDIT (header), Sidequest Owner Telegram ID, Sidequest ID]
-                            telegram.InlineKeyboardButton(text="✏️", callback_data="EDIT,%s,%s" % (id, count)),
+                            # Callback data for listing the accepters is:
+                            # [LIST (header), Sidequest Owner Telegram ID, Sidequest ID]
+                            telegram.InlineKeyboardButton(text="≡ (%s)" % len(accepters),
+                                                          callback_data="LIST,%s,%s" % (id, count)),
                             # Callback data for toggle is:
                             # [TOGGLE (header), Sidequest Giver Telegram ID, Sidequest ID]
                             telegram.InlineKeyboardButton(text="⬜" if telegram_id not in accepters else "☑️",
@@ -665,7 +660,28 @@ def add_reward_handler(update, context):
     update.message.reply_text("Thanks! You're all done!")
 
     text = "%s has added a new sidequest:" % get_name_from_database(user.id)
-    buttons = [[telegram.InlineKeyboardButton(text="%s" % sidequest_database["sidequests"][user.id][quest_id][0], callback_data="SHOW,%s,%s" % (user.id, quest_id))]]
+    title = sidequest_database["sidequests"][user.id][quest_id][0]
+    buttons = []
+
+    buttons.append(
+        [
+            # Callback data for show is:
+            # [SHOW (header), Sidequest Giver Telegram ID, Sidequest ID]
+            telegram.InlineKeyboardButton(text=title if title != "" else "[NO TITLE]",
+                                          callback_data="SHOW,%s,%s" % (user.id, quest_id))
+        ]
+    )
+    buttons.append(
+        [
+            # Callback data for listing the accepters is:
+            # [LIST (header), Sidequest Owner Telegram ID, Sidequest ID]
+            telegram.InlineKeyboardButton(text="≡ (0)",
+                                          callback_data="LIST,%s,%s" % (user.id, quest_id)),
+            # Callback data for toggle is:
+            # [TOGGLE (header), Sidequest Giver Telegram ID, Sidequest ID]
+            telegram.InlineKeyboardButton(text="⬜", callback_data="TOGGLE,%s,%s" % (user.id, quest_id))
+        ]
+    )
 
     for id, name in sidequest_database["users"]:
         if id != user.id:
@@ -689,7 +705,28 @@ def skip_reward_handler(update, context):
     update.message.reply_text("No reward added. You're all done!")
 
     text = "%s has added a new sidequest:" % get_name_from_database(user.id)
-    buttons = [[telegram.InlineKeyboardButton(text="%s" % sidequest_database["sidequests"][user.id][quest_id][0], callback_data="SHOW,%s,%s" % (user.id, quest_id))]]
+    title = sidequest_database["sidequests"][user.id][quest_id][0]
+    buttons = []
+
+    buttons.append(
+        [
+            # Callback data for show is:
+            # [SHOW (header), Sidequest Giver Telegram ID, Sidequest ID]
+            telegram.InlineKeyboardButton(text=title if title != "" else "[NO TITLE]",
+                                          callback_data="SHOW,%s,%s" % (user.id, quest_id))
+        ]
+    )
+    buttons.append(
+        [
+            # Callback data for listing the accepters is:
+            # [LIST (header), Sidequest Owner Telegram ID, Sidequest ID]
+            telegram.InlineKeyboardButton(text="≡ (0)",
+                                          callback_data="LIST,%s,%s" % (user.id, quest_id)),
+            # Callback data for toggle is:
+            # [TOGGLE (header), Sidequest Giver Telegram ID, Sidequest ID]
+            telegram.InlineKeyboardButton(text="⬜", callback_data="TOGGLE,%s,%s" % (user.id, quest_id))
+        ]
+    )
 
     for id, name in sidequest_database["users"]:
         if id != user.id:
@@ -715,7 +752,28 @@ def remove_reward_handler(update, context):
     update.message.reply_text("The reward has been removed. You're all done!")
 
     text = "%s has added a new sidequest:" % get_name_from_database(user.id)
-    buttons = [[telegram.InlineKeyboardButton(text="%s" % sidequest_database["sidequests"][user.id][quest_id][0], callback_data="SHOW,%s,%s" % (user.id, quest_id))]]
+    title = sidequest_database["sidequests"][user.id][quest_id][0]
+    buttons = []
+
+    buttons.append(
+        [
+            # Callback data for show is:
+            # [SHOW (header), Sidequest Giver Telegram ID, Sidequest ID]
+            telegram.InlineKeyboardButton(text=title if title != "" else "[NO TITLE]",
+                                          callback_data="SHOW,%s,%s" % (user.id, quest_id))
+        ]
+    )
+    buttons.append(
+        [
+            # Callback data for listing the accepters is:
+            # [LIST (header), Sidequest Owner Telegram ID, Sidequest ID]
+            telegram.InlineKeyboardButton(text="≡ (0)",
+                                          callback_data="LIST,%s,%s" % (user.id, quest_id)),
+            # Callback data for toggle is:
+            # [TOGGLE (header), Sidequest Giver Telegram ID, Sidequest ID]
+            telegram.InlineKeyboardButton(text="⬜", callback_data="TOGGLE,%s,%s" % (user.id, quest_id))
+        ]
+    )
 
     for id, name in sidequest_database["users"]:
         if id != user.id:
