@@ -22,7 +22,7 @@ with open("api_key.txt", 'r') as f:
     TOKEN = f.read().rstrip()
 
 # Format is mmddyyyy and then additional letters if I need a hotfix.
-PATCHNUMBER = "10272020"
+PATCHNUMBER = "11092020"
 
 ADMIN = [539621524]
 
@@ -66,7 +66,7 @@ def send_message(chat_id, text, photo=None):
             bot.send_photo(chat_id=chat_id, photo=photo, parse_mode=telegram.ParseMode.HTML)
     except Unauthorized as u:
         # Just ignore that person for now.
-        pass
+        return
     except TelegramError as e:
         raise e
 
@@ -89,7 +89,7 @@ def restricted(func):
 
 
 def send_patchnotes():
-    path = "./static_responses/patchnotes_" + PATCHNUMBER + ".txt"
+    path = "./static_responses/patchnotes/patchnotes_" + PATCHNUMBER + ".txt"
 
     if PATCHNUMBER in sidequest_database["patches"] or not os.path.isfile(path):
         return
@@ -412,13 +412,12 @@ def show_all_handler(update, context):
 
 def button_handler(update, context):
     query = update.callback_query
-    chat_id = query.message.chat_id
     user_id = int(query.from_user.id)
 
     split_data = query.data.split(",")
 
     if not check_profile_existence(user_id):
-        send_message(chat_id, "You don't have a sidequest board yet! Make one using /am.")
+        send_message(user_id, "You don't have a sidequest board yet! Make one using /am.")
         return ConversationHandler.END
 
     if split_data[0] == "TOGGLE":
@@ -426,7 +425,7 @@ def button_handler(update, context):
         quest_id = int(split_data[2])
 
         if questgiver_id == user_id:
-            send_message(chat_id, "You can't toggle your own sidequests!")
+            send_message(user_id, "You can't toggle your own sidequests!")
             return
 
         if user_id in sidequest_database["sidequests"][questgiver_id][quest_id][3]:
@@ -438,7 +437,7 @@ def button_handler(update, context):
             send_message(questgiver_id, "%s has accepted your sidequest %s." % (get_name_from_database(user_id), sidequest_database["sidequests"][questgiver_id][quest_id][0]))
             send_message(user_id, "You have accepted sidequest %s for %s." % (sidequest_database["sidequests"][questgiver_id][quest_id][0], get_name_from_database(questgiver_id)))
 
-        bot.edit_message_text(chat_id=chat_id,
+        bot.edit_message_text(chat_id=user_id,
                               text="<b>Sidequests for %s:</b>\n\n" % get_name_from_database(questgiver_id),
                               message_id=query.message.message_id,
                               reply_markup=telegram.InlineKeyboardMarkup(make_display_buttons(questgiver_id, user_id)),
@@ -448,7 +447,7 @@ def button_handler(update, context):
         quest_id = int(split_data[2])
 
         if user_id != questgiver_id:
-            send_message(chat_id, "That's not your sidequest list!")
+            send_message(user_id, "That's not your sidequest list!")
             return
 
         title, description, reward, accepters = sidequest_database["sidequests"][questgiver_id][quest_id]
@@ -458,7 +457,7 @@ def button_handler(update, context):
 
         del sidequest_database["sidequests"][questgiver_id][quest_id]
 
-        bot.edit_message_text(chat_id=chat_id,
+        bot.edit_message_text(chat_id=user_id,
                               message_id=query.message.message_id,
                               text="<b>Sidequests for %s:</b>\n\n" % get_name_from_database(questgiver_id),
                               reply_markup=telegram.InlineKeyboardMarkup(make_display_buttons(questgiver_id, questgiver_id)),
@@ -468,7 +467,7 @@ def button_handler(update, context):
         quest_id = int(split_data[2])
 
         if user_id != questgiver_id:
-            send_message(chat_id, "That's not your sidequest list!")
+            send_message(user_id, "That's not your sidequest list!")
             return
 
         title, description, reward, accepters = sidequest_database["sidequests"][questgiver_id][quest_id]
@@ -479,7 +478,7 @@ def button_handler(update, context):
         sidequest_database["archives"][questgiver_id] = sidequest_database["sidequests"][questgiver_id][quest_id][:]
         del sidequest_database["sidequests"][questgiver_id][quest_id]
 
-        bot.edit_message_text(chat_id=chat_id,
+        bot.edit_message_text(chat_id=user_id,
                               message_id=query.message.message_id,
                               text="<b>Sidequests for %s:</b>\n\n" % get_name_from_database(questgiver_id),
                               reply_markup=telegram.InlineKeyboardMarkup(make_display_buttons(questgiver_id, questgiver_id)),
@@ -489,11 +488,11 @@ def button_handler(update, context):
         quest_id = int(split_data[2])
 
         if user_id != questgiver_id:
-            send_message(chat_id, "That's not your sidequest list!")
+            send_message(user_id, "That's not your sidequest list!")
             return
 
         context.user_data["current_quest"] = quest_id
-        send_message(chat_id, "Let's begin editing that sidequest! "
+        send_message(user_id, "Let's begin editing that sidequest! "
                               "First, send me a title, use /skiptitle, or use /removetitle. "
                               "You can cancel at any time using /cancel.")
 
@@ -501,7 +500,7 @@ def button_handler(update, context):
     elif split_data[0] == "DISPLAY":
         to_display_id = int(split_data[1])
 
-        bot.send_message(chat_id=chat_id,
+        bot.send_message(chat_id=user_id,
                          text="<b>Sidequests for %s:</b>\n\n" % get_name_from_database(to_display_id),
                          reply_markup=telegram.InlineKeyboardMarkup(
                              make_display_buttons(to_display_id, user_id)),
@@ -512,11 +511,11 @@ def button_handler(update, context):
 
         title, description, reward, accepters = sidequest_database["sidequests"][questgiver_id][quest_id]
 
-        send_message(chat_id, "<b>Title:</b> %s" % title + "\n\n<b>Description:</b> %s" % description + "\n\n<b>Reward:</b> %s" % reward)
+        send_message(user_id, "<b>Title:</b> %s" % title + "\n\n<b>Description:</b> %s" % description + "\n\n<b>Reward:</b> %s" % reward)
     elif split_data[0] == "SHOWALL":
         for id, name in sidequest_database["users"]:
             if id != user_id and len(sidequest_database["sidequests"][id]) > 0:
-                bot.send_message(chat_id=chat_id,
+                bot.send_message(chat_id=user_id,
                                  text="<b>Sidequests for %s:</b>\n\n" % name,
                                  reply_markup=telegram.InlineKeyboardMarkup(make_display_buttons(id, user_id)),
                                  parse_mode=telegram.ParseMode.HTML)
@@ -529,7 +528,7 @@ def button_handler(update, context):
         text = "The following people have accepted this sidequest:\n\n"
         for id in accepters:
             text += get_name_from_database(id) + "\n"
-        send_message(chat_id, text)
+        send_message(user_id, text)
 
     return ConversationHandler.END
 
@@ -741,10 +740,9 @@ def skip_reward_handler(update, context):
 def remove_reward_handler(update, context):
     user = update.message.from_user
     quest_id = context.user_data["current_quest"]
-    chat_id = update.message.chat_id
 
     if not check_profile_existence(user.id):
-        send_message(chat_id, "You don't have a sidequest board yet! Make one using /am.")
+        send_message(user.id, "You don't have a sidequest board yet! Make one using /am.")
         return ConversationHandler.END
 
     sidequest_database["sidequests"][user.id][quest_id][2] = ""
@@ -799,11 +797,11 @@ def cancel_handler(update, context):
 
 
 def archives_handler(update, context):
-    chat_id = update.message.chat.id
     user = update.message.from_user
+    chat_id = update.message.chat.id
 
     if not check_profile_existence(user.id):
-        send_message(chat_id, "You don't have a sidequest board yet! Make one using /am.")
+        send_message(user.id, "You don't have a sidequest board yet! Make one using /am.")
         return
 
     send_message(chat_id, "<b>Your Archived Sidequests:</b>")
