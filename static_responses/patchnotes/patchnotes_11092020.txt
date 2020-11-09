@@ -1,0 +1,5 @@
+Patch Notes (10/27/2020):
+
+Feature Changes:
+
+-Messages sent from buttons are now sent as DMs.
