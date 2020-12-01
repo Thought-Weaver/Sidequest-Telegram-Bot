@@ -970,7 +970,7 @@ if __name__ == "__main__":
 
     # Run the bot
 
-    send_patchnotes()
+    #send_patchnotes()
 
     updater.start_polling()
     updater.idle()
